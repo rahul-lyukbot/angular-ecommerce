@@ -10,7 +10,9 @@ import { ProductService } from 'src/app/services/product.service';
 })
 export class ProductListComponent implements OnInit {
   products: Product[] = [];
-  currentCategoryID: number = 1;
+  currentCategoryID!: number;
+  searchMode: boolean = false;
+
   constructor(
     private productService: ProductService,
     private route: ActivatedRoute
@@ -23,6 +25,26 @@ export class ProductListComponent implements OnInit {
   }
 
   listProducts() {
+    this.searchMode = this.route.snapshot.paramMap.has('keyword');
+
+    if (this.searchMode) {
+      this.handleSearchProducts();
+    } else {
+      this.handleListProducts();
+    }
+  }
+
+  handleSearchProducts() {
+    const theKeyword: string = this.route.snapshot.paramMap.get('keyword')!;
+    // now search the products using keyword
+    this.productService
+      .searchProducts(theKeyword)
+      .subscribe((data: Product[]) => {
+        this.products = data;
+      });
+  }
+
+  handleListProducts() {
     // check if "id" parameter is available
     const hasCategoryId: boolean = this.route.snapshot.paramMap.has('id');
     if (hasCategoryId) {
@@ -40,7 +62,4 @@ export class ProductListComponent implements OnInit {
       }
     );
   }
-}
-function listProducts() {
-  throw new Error('Function not implemented.');
 }
