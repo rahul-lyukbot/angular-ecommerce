@@ -14,9 +14,6 @@ import { CartStatusComponent } from './components/cart-status/cart-status.compon
 import { CartDetailsComponent } from './components/cart-details/cart-details.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { HomePageComponent } from './components/home-page/home-page.component';
-import { ImageSliderComponent } from './components/image-slider/image-slider.component';
-import { NgbCarousel } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -28,8 +25,6 @@ import { NgbCarousel } from '@ng-bootstrap/ng-bootstrap';
     CartStatusComponent,
     CartDetailsComponent,
     CheckoutComponent,
-    HomePageComponent,
-    ImageSliderComponent,
   ],
   imports: [
     BrowserModule,
