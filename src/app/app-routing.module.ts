@@ -4,8 +4,18 @@ import { ProductListComponent } from './components/product-list/product-list.com
 import { ProductDetailsComponent } from './components/product-details/product-details.component';
 import { CartDetailsComponent } from './components/cart-details/cart-details.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
+import { HomePageComponent } from './components/home-page/home-page.component';
+import { ImageSliderComponent } from './components/image-slider/image-slider.component';
 
 const routes: Routes = [
+  {
+    path: 'image-slider',
+    component: ImageSliderComponent,
+  },
+  {
+    path: 'home-page',
+    component: HomePageComponent,
+  },
   {
     path: 'checkout',
     component: CheckoutComponent,
@@ -36,12 +46,12 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: '/products',
+    redirectTo: '/home-page',
     pathMatch: 'full',
   },
   {
     path: '**',
-    redirectTo: '/products',
+    redirectTo: '/home-page',
     pathMatch: 'full',
   },
 ];
