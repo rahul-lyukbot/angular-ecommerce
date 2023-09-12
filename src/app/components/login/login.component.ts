@@ -16,7 +16,7 @@ export class LoginComponent implements OnInit {
       logo: 'assets/images/EcomLogo.png',
       baseUrl: myAppConfig.oidc.issuer.split('/oauth2')[0],
       clientId: myAppConfig.oidc.clientId,
-      redirectUrl: myAppConfig.oidc.redirectUri,
+      redirectUri: myAppConfig.oidc.redirectUri,
       authParams: {
         pkce: true,
         issuer: myAppConfig.oidc.issuer,
