@@ -7,6 +7,14 @@
     <i class="fa-solid fa-user"></i> Login
   </button>
   <button *ngIf="isAuthenticated" (click)="logout()" class="security-btn">
-    <i class="fa-solid fa-user"></i> Logout
+    <i class="fa-solid fa-user mr-4"></i> Logout
+  </button>
+  <button
+    *ngIf="isAuthenticated"
+    routerLink="/members"
+    id="member-btn"
+    class="security-btn ml-2"
+  >
+    Member
   </button>
 </div>
