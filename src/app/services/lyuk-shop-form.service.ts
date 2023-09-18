@@ -4,13 +4,14 @@ import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Country } from '../common/country';
 import { State } from '../common/state';
+import { environment } from 'src/environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LyukShopFormService {
-  private countryUrl = 'http://localhost:8080/api/countries';
-  private statesUrl = 'http://localhost:8080/api/states';
+  private countryUrl = environment.lyukshopApiUrl+'/countries';
+  private statesUrl = environment.lyukshopApiUrl+'/states';
 
   constructor(private httpClient: HttpClient) {}
 
