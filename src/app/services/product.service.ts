@@ -10,8 +10,8 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class ProductService {
-  private baseUrl = environment.lyukshopApiUrl+'/products';
-  private categoryUrl = environment.lyukshopApiUrl+'/product-category';
+  private baseUrl = environment.lyukshopApiUrl + '/products';
+  private categoryUrl = environment.lyukshopApiUrl + '/product-category';
   constructor(private httpClient: HttpClient) {}
 
   // here we are mapping our json data from spring to rest to product array
@@ -32,6 +32,8 @@ export class ProductService {
     const searchUrl =
       `${this.baseUrl}/search/findByCategoryId?id=${theCategoryId}` +
       `&page=${thePage}&size=${thePageSize}`;
+
+    console.log(`getting products from ~ ${searchUrl}`);
 
     // Fetch the products.
     return this.httpClient.get<GetResponseProducts>(searchUrl);
