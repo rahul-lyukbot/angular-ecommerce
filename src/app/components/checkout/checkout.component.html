@@ -410,7 +410,12 @@
 
         <!--submit button-->
         <div class="text-container">
-          <button (click)="onSubmit()" type="submit" class="btn btn-primary">
+          <button
+            (click)="onSubmit()"
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!checkoutFormGroup.valid || isDisabled"
+          >
             Purchase
           </button>
         </div>
