@@ -9,12 +9,14 @@ import { Router } from '@angular/router';
 import { Country } from 'src/app/common/country';
 import { Order } from 'src/app/common/order';
 import { OrderItem } from 'src/app/common/order-item';
+import { PaymentInfo } from 'src/app/common/payment-info';
 import { Purchase } from 'src/app/common/purchase';
 import { State } from 'src/app/common/state';
 import { CartService } from 'src/app/services/cart.service';
 import { CheckoutService } from 'src/app/services/checkout.service';
 import { LyukShopFormService } from 'src/app/services/lyuk-shop-form.service';
 import { LyukShopValidators } from 'src/app/validators/lyuk-shop-validators';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-checkout',
@@ -35,6 +37,13 @@ export class CheckoutComponent implements OnInit {
 
   storage: Storage = sessionStorage;
 
+  // intialize stripe API
+  stripe = Stripe(environment.stripePublishableKey);
+
+  paymentInfo: PaymentInfo = new PaymentInfo();
+  cardElement: any;
+  displayError: any = '';
+
   constructor(
     private formBuilder: FormBuilder,
     private lyukShopFormService: LyukShopFormService,
@@ -44,6 +53,8 @@ export class CheckoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // setup Stripe Payment form
+    this.setupStripePaymentForm();
     this.reviewCartDetails();
 
     // read users email address from browsers storage
@@ -105,6 +116,7 @@ export class CheckoutComponent implements OnInit {
         ]),
       }),
       cardDetails: this.formBuilder.group({
+        /*
         cardType: new FormControl('', [Validators.required]),
         nameOnCard: new FormControl('', [
           Validators.required,
@@ -121,10 +133,12 @@ export class CheckoutComponent implements OnInit {
         ]),
         expirationMonth: [''],
         expirationYear: [''],
+        */
       }),
     });
 
-    // populaten card months
+    /*
+    // populate card months
     const startMonth: number = new Date().getMonth() + 1;
     console.log(`start month ${startMonth}`);
     this.lyukShopFormService.getCardMonths(startMonth).subscribe((data) => {
@@ -137,12 +151,35 @@ export class CheckoutComponent implements OnInit {
     this.lyukShopFormService.getCardYears().subscribe((data) => {
       console.log(`Retrieved card years: ${JSON.stringify(data)}`);
       this.cardYears = data;
-    });
+    });*/
 
     // populated countries
     this.lyukShopFormService.getCountries().subscribe((data) => {
       console.log(`Retrieved countries: ${JSON.stringify(data)}`);
       this.countries = data;
+    });
+  }
+  setupStripePaymentForm() {
+    // get a handle to stripe elements
+    var elements = this.stripe.elements();
+
+    // create a card element
+    this.cardElement = elements.create('card', { hidePostalcode: true });
+
+    // add a instance of card UI component into the 'card-element' div we have in our checkout.component.html
+    this.cardElement.mount('#card-element');
+
+    // add event binding for the 'change' event on the card element to check the validation
+    this.cardElement.on('change', (event: any) => {
+      // get a handle to card-erros element
+      this.displayError = document.getElementById('card-errors');
+
+      if (event.complete) {
+        this.displayError.textContent = '';
+      } else if (event.error) {
+        // show validation error to customer
+        this.displayError.textContent = event.error.message;
+      }
     });
   }
   reviewCartDetails() {
@@ -281,20 +318,58 @@ export class CheckoutComponent implements OnInit {
     purchase.order = order;
     purchase.orderItems = orderItems;
 
-    // call REST api via the checkoutServices
-    this.checkoutService.placeOrder(purchase).subscribe({
-      next: (response) => {
-        alert(
-          `Your order has been received.\nOrder tracking number: ${response.orderTrackingNumber}`
-        );
+    // compute payment info
+    this.paymentInfo.amount = this.totalPrice * 100;
+    this.paymentInfo.currency = 'USD';
 
-        // reset cart
-        this.resetCart();
-      },
-      error: (err) => {
-        alert(`There was an error: ${err.message}`);
-      },
-    });
+    // if valid form then
+    // - create payment intent
+    // - confirm card payment
+    // - place order
+    if (
+      !this.checkoutFormGroup.invalid &&
+      this.displayError.textContent === ''
+    ) {
+      this.checkoutService
+        .createPaymentIntent(this.paymentInfo)
+        .subscribe((paymentIntentResponse) => {
+          // this is stripe inbuilt method which is use to send data to stipe servers
+          this.stripe
+            .confirmCardPayment(
+              paymentIntentResponse.client_secret,
+              {
+                payment_method: {
+                  card: this.cardElement,
+                },
+              },
+              { handleActions: false }
+            )
+            .then((result: any) => {
+              if (result.error) {
+                // inform the customer there was an error
+                alert(`There was an error: ${result.error.message}`);
+              } else {
+                // call REST API via the CheckoutServices
+                this.checkoutService.placeOrder(purchase).subscribe({
+                  next: (response: any) => {
+                    alert(
+                      `Your order has been received. \nOrder tracking number: ${response.orderTrackingNumber}`
+                    );
+
+                    // reset cart
+                    this.resetCart();
+                  },
+                  error: (err: any) => {
+                    alert(`There was an error: ${err.message}`);
+                  },
+                });
+              }
+            });
+        });
+    } else {
+      this.checkoutFormGroup.markAllAsTouched();
+      return;
+    }
   }
   resetCart() {
     // reset cart data
@@ -309,6 +384,7 @@ export class CheckoutComponent implements OnInit {
     this.router.navigateByUrl('/products');
   }
 
+  /*
   handleMonthsAndYears() {
     const cardFormFroup = this.checkoutFormGroup.get('creditCard');
 
@@ -328,6 +404,7 @@ export class CheckoutComponent implements OnInit {
       this.cardMonths = data;
     });
   }
+  */
 
   getStates(formGroupName: string) {
     const formGroup = this.checkoutFormGroup.get(formGroupName);
