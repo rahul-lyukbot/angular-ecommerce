@@ -3,7 +3,7 @@
     <i class="fa-solid fa-door-open"></i>Welcome back {{ userFullName }}!
   </div>
 
-  <button *ngIf="!isAuthenticated" routerLink="/login" class="security-btn">
+  <button *ngIf="!isAuthenticated" routerLink="/login" class="btn btn-primary">
     <i class="fa-solid fa-user"></i> Login
   </button>
   <button *ngIf="isAuthenticated" (click)="logout()" class="security-btn">
